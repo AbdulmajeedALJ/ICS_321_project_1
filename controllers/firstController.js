@@ -24,7 +24,6 @@ const fetchAll = async (req, res, tableName) => {
   }
 };
 
-exports.getCourses = (req, res) => fetchAll(req, res, "Course");
 exports.getHorses = (req, res) => fetchAll(req, res, "Horse");
 exports.getOwners = (req, res) => fetchAll(req, res, "Owner");
 exports.getOwns = (req, res) => fetchAll(req, res, "Owns");

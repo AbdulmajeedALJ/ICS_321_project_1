@@ -3,7 +3,6 @@ const firstController = require("../controllers/firstController");
 const router = express.Router();
 
 router.get("/", firstController.firstFunction);
-router.get("/courses", firstController.getCourses);
 router.get("/horses", firstController.getHorses);
 router.get("/owners", firstController.getOwners);
 router.get("/owns", firstController.getOwns);
