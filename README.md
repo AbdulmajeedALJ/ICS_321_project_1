@@ -1,4 +1,4 @@
-# Node.js Backend Template
+# Node.js Backend For MySQL
 
 This repository provides a basic Node.js backend boilerplate to help you quickly get started with a RESTful API server. It's structured with separation of concerns in mind, making it easier to scale and maintain.
 
@@ -48,6 +48,18 @@ DATABASE_PASSWORD=<your_db_password>
 ```bash
 node server.js
 ```
+
+## Available Endpoints
+
+- `GET /` — executes a custom SQL query supplied in the JSON body (`{ "query": "SELECT ..." }`)
+- `GET /horses` — lists all records from the `Horse` table
+- `GET /owners` — lists all records from the `Owner` table
+- `GET /owns` — lists all ownership relationships from the `Owns` table
+- `GET /stables` — lists all records from the `Stable` table
+- `GET /trainers` — lists all records from the `Trainer` table
+- `GET /races` — lists all records from the `Race` table
+- `GET /race-results` — lists all records from the `RaceResults` table
+- `GET /tracks` — lists all records from the `Track` table
 
 ### 4. About `server.js`
 
