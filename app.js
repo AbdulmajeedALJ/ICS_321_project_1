@@ -1,16 +1,16 @@
 const express = require("express");
-const firstRoute = require("./routes/firstRoute");
+const dataRoutes = require("./routes/dataRoutes");
 
 const app = express();
 
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
-app.use("/", firstRoute);
+app.use("/", dataRoutes);
 
-// app.all("*", (req, res, next) => {
-//   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
-// });
+app.all("*", (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
 
 // app.use(globalErrorHandler);
 
