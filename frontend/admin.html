@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horse Racing DB – Admin</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="page page--admin">
+  <header class="page__header">
+    <h1>Horse Racing Database – Admin Console</h1>
+    <p class="page__subtitle">
+      Manage race data, owners, horses and trainers.
+    </p>
+    <nav class="page__nav">
+      <a href="./guest.html" class="btn btn--ghost">Switch to Guest View</a>
+    </nav>
+  </header>
+
+  <main class="page__content">
+    <section class="card">
+      <header class="card__header">
+        <h2>Add Race &amp; Results</h2>
+        <p>
+          Capture a race and its results in a single run. Add at least one horse result.
+        </p>
+      </header>
+
+      <form id="add-race-form" class="form">
+        <div class="form__fieldset">
+          <label for="race-id">Race ID</label>
+          <input id="race-id" name="raceId" type="number" placeholder="e.g. 42" required />
+        </div>
+        <div class="form__grid form__grid--2">
+          <label>
+            Race Name
+            <input name="raceName" type="text" placeholder="Sunset Derby" required />
+          </label>
+          <label>
+            Track Name
+            <input name="trackName" type="text" placeholder="Hilo Track" required />
+          </label>
+        </div>
+        <div class="form__grid form__grid--2">
+          <label>
+            Race Date
+            <input name="raceDate" type="date" required />
+          </label>
+          <label>
+            Race Time
+            <input name="raceTime" type="time" required />
+          </label>
+        </div>
+
+        <fieldset class="form__subgroup">
+          <legend>Race Results</legend>
+          <p class="hint">Include every participating horse with its finishing position and prize.</p>
+          <div id="race-results-rows" class="form__repeatable">
+            <!-- rows appended here -->
+          </div>
+          <button type="button" class="btn btn--ghost" id="add-result-row-btn">Add Horse Result</button>
+        </fieldset>
+
+        <button type="submit" class="btn btn--primary">Submit Race &amp; Results</button>
+      </form>
+
+      <section aria-live="polite" class="response" id="add-race-response"></section>
+    </section>
+
+    <section class="card">
+      <header class="card__header">
+        <h2>Delete Owner (Stored Procedure)</h2>
+        <p>Invoke your procedural delete to remove an owner and all related data.</p>
+      </header>
+
+      <form id="delete-owner-form" class="form form--inline">
+        <label>
+          Owner ID
+          <input name="ownerId" type="number" placeholder="e.g. 15" required />
+        </label>
+        <label>
+          Procedure Name
+          <input name="procedureName" type="text" value="DeleteOwnerCascade" />
+        </label>
+        <button type="submit" class="btn btn--danger">Call Procedure</button>
+      </form>
+
+      <section aria-live="polite" class="response" id="delete-owner-response"></section>
+    </section>
+
+    <section class="card">
+      <header class="card__header">
+        <h2>Move Horse to Another Stable</h2>
+        <p>Reassign a horse to a new stable using its identifiers.</p>
+      </header>
+
+      <form id="move-horse-form" class="form form--inline">
+        <label>
+          Horse ID
+          <input name="horseId" type="number" placeholder="e.g. 21" required />
+        </label>
+        <label>
+          Target Stable ID
+          <input name="stableId" type="number" placeholder="e.g. 4" required />
+        </label>
+        <button type="submit" class="btn btn--primary">Move Horse</button>
+      </form>
+
+      <section aria-live="polite" class="response" id="move-horse-response"></section>
+    </section>
+
+    <section class="card">
+      <header class="card__header">
+        <h2>Approve Trainer</h2>
+        <p>Insert a new trainer into the system and assign them to a stable.</p>
+      </header>
+
+      <form id="approve-trainer-form" class="form form--inline">
+        <label>
+          Trainer ID
+          <input name="trainerId" type="number" placeholder="e.g. 33" required />
+        </label>
+        <label>
+          First Name
+          <input name="firstName" type="text" placeholder="Alex" required />
+        </label>
+        <label>
+          Last Name
+          <input name="lastName" type="text" placeholder="Rivera" required />
+        </label>
+        <label>
+          Stable ID
+          <input name="stableId" type="number" placeholder="e.g. 4" required />
+        </label>
+        <button type="submit" class="btn btn--primary">Approve Trainer</button>
+      </form>
+
+      <section aria-live="polite" class="response" id="approve-trainer-response"></section>
+    </section>
+  </main>
+
+  <template id="race-result-row-template">
+    <div class="form__row">
+      <label>
+        Horse ID
+        <input type="number" name="horseId" placeholder="Horse ID" required />
+      </label>
+      <label>
+        Finish Position
+        <input type="number" name="result" placeholder="1" min="1" required />
+      </label>
+      <label>
+        Prize
+        <input type="number" name="prize" placeholder="5000" step="0.01" min="0" required />
+      </label>
+      <button type="button" class="btn btn--icon remove-row-btn" title="Remove result row">&times;</button>
+    </div>
+  </template>
+
+  <script src="./admin.js" type="module"></script>
+</body>
+</html>

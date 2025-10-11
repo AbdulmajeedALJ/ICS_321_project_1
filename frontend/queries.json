@@ -1,0 +1,17 @@
+{
+  "admin": {
+    "addRace": {
+      "raceInsert": "INSERT INTO Race (raceId, raceName, trackName, raceDate, raceTime) VALUES ({raceId}, '{raceName}', '{trackName}', '{raceDate}', '{raceTime}');",
+      "resultsInsert": "INSERT INTO RaceResults (raceId, horseId, results, prize) VALUES {values};"
+    },
+    "deleteOwner": "CALL {procedureName}({ownerId});",
+    "moveHorse": "UPDATE Horse SET stableId = {stableId} WHERE horseId = {horseId};",
+    "approveTrainer": "INSERT INTO Trainer (trainerId, lname, fname, stableId) VALUES ({trainerId}, '{lastName}', '{firstName}', {stableId});"
+  },
+  "guest": {
+    "ownersHorses": "SELECT h.horseName AS horseName, h.age AS horseAge, t.fname AS trainerFirstName, t.lname AS trainerLastName FROM Owner o INNER JOIN Owns ow ON o.ownerId = ow.ownerId INNER JOIN Horse h ON ow.horseId = h.horseId LEFT JOIN Trainer t ON t.stableId = h.stableId WHERE o.lname = '{ownerLastName}' ORDER BY h.horseName;",
+    "winningTrainers": "SELECT DISTINCT t.fname AS trainerFirstName, t.lname AS trainerLastName, h.horseName AS winningHorse, r.raceName AS winningRace, r.raceDate AS raceDate FROM Trainer t INNER JOIN Horse h ON t.stableId = h.stableId INNER JOIN RaceResults rr ON rr.horseId = h.horseId INNER JOIN Race r ON r.raceId = rr.raceId WHERE rr.results = 1 OR CAST(rr.results AS CHAR) LIKE '1%' OR LOWER(CAST(rr.results AS CHAR)) LIKE 'first%' ORDER BY r.raceDate DESC, t.lname, t.fname;",
+    "trainerWinnings": "SELECT t.fname AS trainerFirstName, t.lname AS trainerLastName, COALESCE(SUM(rr.prize), 0) AS totalWinnings FROM Trainer t LEFT JOIN Horse h ON t.stableId = h.stableId LEFT JOIN RaceResults rr ON rr.horseId = h.horseId GROUP BY t.trainerId, t.fname, t.lname ORDER BY totalWinnings DESC, t.lname, t.fname;",
+    "trackActivity": "SELECT tr.trackName AS trackName, tr.location AS trackLocation, tr.length AS trackLength, COUNT(DISTINCT r.raceId) AS raceCount, COUNT(DISTINCT rr.horseId) AS totalHorses FROM Track tr LEFT JOIN Race r ON tr.trackName = r.trackName LEFT JOIN RaceResults rr ON rr.raceId = r.raceId GROUP BY tr.trackName, tr.location, tr.length ORDER BY tr.trackName;"
+  }
+}

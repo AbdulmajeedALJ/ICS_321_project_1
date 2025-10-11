@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horse Racing DB – Guest</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="page page--guest">
+  <header class="page__header">
+    <h1>Horse Racing Database – Guest Portal</h1>
+    <p class="page__subtitle">
+      Explore horses, trainers, tracks and race results.
+    </p>
+    <nav class="page__nav">
+      <a href="./admin.html" class="btn btn--ghost">Switch to Admin View</a>
+    </nav>
+  </header>
+
+  <main class="page__content">
+    <section class="card">
+      <header class="card__header">
+        <h2>Owners' Horses &amp; Trainers</h2>
+        <p>Enter an owner's last name to see their horses and the assigned trainers.</p>
+      </header>
+      <form id="owners-horses-form" class="form form--inline">
+        <label>
+          Owner Last Name
+          <input name="ownerLastName" type="text" placeholder="e.g. Nakamura" required />
+        </label>
+        <button type="submit" class="btn btn--primary">Browse Horses</button>
+      </form>
+      <section aria-live="polite" class="response" id="owners-horses-response"></section>
+    </section>
+
+    <section class="card">
+      <header class="card__header">
+        <h2>Winning Trainers</h2>
+        <p>Review trainers who have coached horses to first place finishes.</p>
+      </header>
+      <button class="btn btn--primary" id="winning-trainers-btn">Fetch Winning Trainers</button>
+      <section aria-live="polite" class="response" id="winning-trainers-response"></section>
+    </section>
+
+    <section class="card">
+      <header class="card__header">
+        <h2>Trainer Prize Totals</h2>
+        <p>Aggregate prize winnings for each trainer, sorted by total.</p>
+      </header>
+      <button class="btn btn--primary" id="trainer-winnings-btn">Fetch Trainer Winnings</button>
+      <section aria-live="polite" class="response" id="trainer-winnings-response"></section>
+    </section>
+
+    <section class="card">
+      <header class="card__header">
+        <h2>Track Activity</h2>
+        <p>List tracks, race counts and horse participation totals.</p>
+      </header>
+      <button class="btn btn--primary" id="track-activity-btn">Fetch Track Activity</button>
+      <section aria-live="polite" class="response" id="track-activity-response"></section>
+    </section>
+  </main>
+
+  <script src="./guest.js" type="module"></script>
+</body>
+</html>
