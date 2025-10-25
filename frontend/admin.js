@@ -386,12 +386,12 @@ if (moveHorseForm) {
     try {
       const formData = new FormData(moveHorseForm);
       const horseId = sanitizeIdentifier(formData.get("horseId"), "horse");
-      const stableId = toNumber(formData.get("stableId"));
+      const stableId = sanitizeIdentifier(formData.get("stableId"), "stable");
 
-      if (!horseId || !Number.isFinite(stableId)) {
+      if (!horseId || !stableId) {
         setResponse(moveHorseResponse, {
           state: "error",
-          message: "Horse ID must look like horse1 and Stable ID must be a number.",
+          message: "Horse ID must look like horse1 and Stable ID must look like stable1.",
         });
         return;
       }
@@ -399,7 +399,7 @@ if (moveHorseForm) {
       const moveHorseTemplate = await getAdminQuery("moveHorse");
       const query = formatQuery(moveHorseTemplate, {
         horseId: `'${escapeSqlString(horseId)}'`,
-        stableId,
+        stableId: `'${escapeSqlString(stableId)}'`,
       });
 
       sendQuery(query, moveHorseResponse);
@@ -421,25 +421,25 @@ if (approveTrainerForm) {
     event.preventDefault();
     try {
       const formData = new FormData(approveTrainerForm);
-      const trainerId = toNumber(formData.get("trainerId"));
+      const trainerId = sanitizeIdentifier(formData.get("trainerId"), "trainer");
       const firstName = escapeSqlString(formData.get("firstName"));
       const lastName = escapeSqlString(formData.get("lastName"));
-      const stableId = toNumber(formData.get("stableId"));
+      const stableId = sanitizeIdentifier(formData.get("stableId"), "stable");
 
-      if (!Number.isFinite(trainerId) || !Number.isFinite(stableId)) {
+      if (!trainerId || !stableId) {
         setResponse(approveTrainerResponse, {
           state: "error",
-          message: "Trainer ID and Stable ID must both be numbers.",
+          message: "Trainer ID must look like trainer1 and Stable ID must look like stable1.",
         });
         return;
       }
 
       const approveTrainerTemplate = await getAdminQuery("approveTrainer");
       const query = formatQuery(approveTrainerTemplate, {
-        trainerId,
+        trainerId: `'${escapeSqlString(trainerId)}'`,
         lastName,
         firstName,
-        stableId,
+        stableId: `'${escapeSqlString(stableId)}'`,
       });
 
       sendQuery(query, approveTrainerResponse);
