@@ -4,7 +4,7 @@
       "raceInsert": "INSERT INTO Race (raceId, raceName, trackName, raceDate, raceTime) VALUES ({raceId}, '{raceName}', '{trackName}', '{raceDate}', '{raceTime}');",
       "resultsInsert": "INSERT INTO RaceResults (raceId, horseId, results, prize) VALUES {values};"
     },
-    "deleteOwner": "CALL {procedureName}({ownerId});",
+    "deleteOwner": "DELETE FROM Owner WHERE ownerId = {ownerId};",
     "moveHorse": "UPDATE Horse SET stableId = {stableId} WHERE horseId = {horseId};",
     "approveTrainer": "INSERT INTO Trainer (trainerId, lname, fname, stableId) VALUES ({trainerId}, '{lastName}', '{firstName}', {stableId});"
   },

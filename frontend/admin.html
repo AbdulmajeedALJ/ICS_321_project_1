@@ -13,7 +13,7 @@
       Manage race data, owners, horses and trainers.
     </p>
     <nav class="page__nav">
-      <a href="./guest.html" class="btn btn--ghost">Switch to Guest View</a>
+      <a href="./loginPage.html" class="btn btn--ghost">Logout</a>
     </nav>
   </header>
 
@@ -29,16 +29,16 @@
       <form id="add-race-form" class="form">
         <div class="form__fieldset">
           <label for="race-id">Race ID</label>
-          <input id="race-id" name="raceId" type="number" placeholder="e.g. 42" required />
+          <input id="race-id" name="raceId" type="text" placeholder="race1" required />
         </div>
         <div class="form__grid form__grid--2">
           <label>
             Race Name
-            <input name="raceName" type="text" placeholder="Sunset Derby" required />
+            <input name="raceName" type="text" placeholder="Handicap" required />
           </label>
           <label>
             Track Name
-            <input name="trackName" type="text" placeholder="Hilo Track" required />
+            <input name="trackName" type="text" placeholder="Yanbu" required />
           </label>
         </div>
         <div class="form__grid form__grid--2">
@@ -76,11 +76,7 @@
       <form id="delete-owner-form" class="form form--inline">
         <label>
           Owner ID
-          <input name="ownerId" type="number" placeholder="e.g. 15" required />
-        </label>
-        <label>
-          Procedure Name
-          <input name="procedureName" type="text" value="DeleteOwnerCascade" />
+          <input name="ownerId" type="text" placeholder="owner1" required />
         </label>
         <button type="submit" class="btn btn--danger">Call Procedure</button>
       </form>
@@ -97,7 +93,7 @@
       <form id="move-horse-form" class="form form--inline">
         <label>
           Horse ID
-          <input name="horseId" type="number" placeholder="e.g. 21" required />
+          <input name="horseId" type="text" placeholder="horse1" required />
         </label>
         <label>
           Target Stable ID
@@ -143,11 +139,17 @@
     <div class="form__row">
       <label>
         Horse ID
-        <input type="number" name="horseId" placeholder="Horse ID" required />
+        <input type="text" name="horseId" placeholder="horse1" required />
       </label>
       <label>
         Finish Position
-        <input type="number" name="result" placeholder="1" min="1" required />
+        <select name="result" required>
+          <option value="" disabled selected>Select result</option>
+          <option value="first">First</option>
+          <option value="second">Second</option>
+          <option value="third">Third</option>
+          <option value="other">Other</option>
+        </select>
       </label>
       <label>
         Prize

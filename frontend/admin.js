@@ -11,6 +11,20 @@ const toNumber = (raw) => {
   return Number.isFinite(num) ? num : NaN;
 };
 
+const sanitizeIdentifier = (raw, requiredPrefix) => {
+  if (typeof raw !== "string") return "";
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  const normalized = trimmed.toLowerCase();
+  if (requiredPrefix && !normalized.startsWith(requiredPrefix.toLowerCase())) {
+    return "";
+  }
+  if (!/^[a-z]+[0-9]+$/.test(normalized)) {
+    return "";
+  }
+  return normalized;
+};
+
 const normalizeQuery = (sql) =>
   (sql || "")
     .split("\n")
@@ -35,6 +49,23 @@ const loadQueries = async () => {
   }
   queriesCache = await response.json();
   return queriesCache;
+};
+
+const getAdminQueries = async () => {
+  const queries = await loadQueries();
+  const adminQueries = queries?.admin;
+  if (!adminQueries) {
+    throw new Error("Admin query definitions are missing.");
+  }
+  return adminQueries;
+};
+
+const getAdminQuery = async (key) => {
+  const adminQueries = await getAdminQueries();
+  if (!(key in adminQueries)) {
+    throw new Error(`Admin query '${key}' is not defined.`);
+  }
+  return adminQueries[key];
 };
 
 const renderTable = (data) => {
@@ -97,6 +128,35 @@ const setResponse = (container, { state, message, query, rows }) => {
   container.innerHTML = parts.join("");
 };
 
+const executeSql = async (query) => {
+  const normalizedQuery = normalizeQuery(query);
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: normalizedQuery }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok || payload.status !== "success") {
+      const error = new Error(payload.message || "Failed to execute query.");
+      error.query = normalizedQuery;
+      error.details = payload;
+      throw error;
+    }
+
+    return { payload, query: normalizedQuery };
+  } catch (error) {
+    if (!error.query) {
+      error.query = normalizedQuery;
+    }
+    throw error;
+  }
+};
+
 const sendQuery = async (query, container) => {
   const normalizedQuery = normalizeQuery(query);
 
@@ -107,31 +167,19 @@ const sendQuery = async (query, container) => {
   });
 
   try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query: normalizedQuery }),
-    });
-
-    const payload = await response.json();
-
-    if (!response.ok || payload.status !== "success") {
-      throw new Error(payload.message || "Unknown error.");
-    }
+    const { payload, query: executedQuery } = await executeSql(query);
 
     setResponse(container, {
       state: "success",
       message: `Success! Rows affected/returned: ${payload.results ?? "n/a"}`,
-      query: normalizedQuery,
+      query: executedQuery,
       rows: payload.data,
     });
   } catch (error) {
     setResponse(container, {
       state: "error",
       message: error.message || "Failed to execute query.",
-      query: normalizedQuery,
+      query: error.query || normalizedQuery,
     });
   }
 };
@@ -177,26 +225,28 @@ appendResultRow();
 
 const addRaceForm = document.getElementById("add-race-form");
 const addRaceResponse = document.getElementById("add-race-response");
+const allowedResults = new Set(["first", "second", "third", "other"]);
 
 if (addRaceForm) {
   addRaceForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     try {
-      const queries = await loadQueries();
       const formData = new FormData(addRaceForm);
-      const raceId = toNumber(formData.get("raceId"));
+      const raceId = sanitizeIdentifier(formData.get("raceId"), "race");
       const raceName = escapeSqlString(formData.get("raceName"));
       const trackName = escapeSqlString(formData.get("trackName"));
       const raceDate = formData.get("raceDate");
       const raceTime = formData.get("raceTime");
 
-      if (!Number.isFinite(raceId)) {
+      if (!raceId) {
         setResponse(addRaceResponse, {
           state: "error",
-          message: "Race ID must be a valid number.",
+          message: "Race ID must look like race1, race2, etc.",
         });
         return;
       }
+
+      const raceIdSql = escapeSqlString(raceId);
 
       const resultRows = [...raceResultsWrapper.querySelectorAll(".form__row")];
 
@@ -210,29 +260,40 @@ if (addRaceForm) {
 
       const resultValues = [];
       for (const row of resultRows) {
-        const horseId = toNumber(row.querySelector('input[name="horseId"]')?.value);
-        const result = toNumber(row.querySelector('input[name="result"]')?.value);
+        const horseId = sanitizeIdentifier(
+          row.querySelector('input[name="horseId"]')?.value,
+          "horse"
+        );
+        const resultRaw = row.querySelector('[name="result"]')?.value;
+        const result =
+          typeof resultRaw === "string" ? resultRaw.trim().toLowerCase() : "";
         const prizeRaw = row.querySelector('input[name="prize"]')?.value;
         const prize = toNumber(prizeRaw ?? 0);
 
-        if (!Number.isFinite(horseId) || !Number.isFinite(result)) {
+        if (!horseId || !allowedResults.has(result)) {
           setResponse(addRaceResponse, {
             state: "error",
-            message: "Every race result row must include numeric horse ID and finish position.",
+            message:
+              "Every race result row must include a horse ID like horse1 and a valid finish position.",
           });
           return;
         }
 
         const prizeValue = Number.isFinite(prize) ? prize : 0;
 
-        resultValues.push(`(${raceId}, ${horseId}, ${result}, ${prizeValue})`);
+        const finishPosition = escapeSqlString(result);
+        const horseIdSql = escapeSqlString(horseId);
+
+        resultValues.push(
+          `('${raceIdSql}', '${horseIdSql}', '${finishPosition}', ${prizeValue})`
+        );
       }
 
       const { raceInsert: raceInsertTemplate, resultsInsert: resultsInsertTemplate } =
-        queries.admin.addRace;
+        await getAdminQuery("addRace");
 
       const raceInsert = formatQuery(raceInsertTemplate, {
-        raceId,
+        raceId: `'${raceIdSql}'`,
         raceName,
         trackName,
         raceDate,
@@ -243,8 +304,34 @@ if (addRaceForm) {
         values: resultValues.join(", "),
       });
 
-      const query = `${raceInsert} ${resultsInsert}`;
-      sendQuery(query, addRaceResponse);
+      const raceInsertDisplay = normalizeQuery(raceInsert);
+      const resultsInsertDisplay = normalizeQuery(resultsInsert);
+
+      setResponse(addRaceResponse, {
+        state: "loading",
+        message: "Creating race and inserting results...",
+        query: `${raceInsertDisplay};\n${resultsInsertDisplay};`,
+      });
+
+      try {
+        const raceOutcome = await executeSql(raceInsert);
+        const resultsOutcome = await executeSql(resultsInsert);
+
+        setResponse(addRaceResponse, {
+          state: "success",
+          message: `Race created and ${resultValues.length} race result ${
+            resultValues.length === 1 ? "entry" : "entries"
+          } stored.`,
+          query: `${raceOutcome.query};\n${resultsOutcome.query};`,
+          rows: resultsOutcome.payload?.data,
+        });
+      } catch (error) {
+        setResponse(addRaceResponse, {
+          state: "error",
+          message: error.message || "Failed to execute race insert.",
+          query: error.query || `${raceInsertDisplay};\n${resultsInsertDisplay};`,
+        });
+      }
     } catch (error) {
       setResponse(addRaceResponse, {
         state: "error",
@@ -262,26 +349,23 @@ if (deleteOwnerForm) {
   deleteOwnerForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     try {
-      const queries = await loadQueries();
       const formData = new FormData(deleteOwnerForm);
-      const ownerId = toNumber(formData.get("ownerId"));
-      const procedureName = (formData.get("procedureName") || "DeleteOwnerCascade").replace(
-        /[^A-Za-z0-9_]/g,
-        ""
-      );
+      const ownerId = sanitizeIdentifier(formData.get("ownerId"), "owner");
 
-      if (!Number.isFinite(ownerId)) {
+      if (!ownerId) {
         setResponse(deleteOwnerResponse, {
           state: "error",
-          message: "Owner ID must be a valid number.",
+          message: "Owner ID must look like owner1, owner2, etc.",
         });
         return;
       }
 
-      const query = formatQuery(queries.admin.deleteOwner, {
-        procedureName,
-        ownerId,
+      const deleteOwnerTemplate = await getAdminQuery("deleteOwner");
+      const safeOwnerId = `'${escapeSqlString(ownerId)}'`;
+      const query = formatQuery(deleteOwnerTemplate, {
+        ownerId: safeOwnerId,
       });
+
       sendQuery(query, deleteOwnerResponse);
     } catch (error) {
       setResponse(deleteOwnerResponse, {
@@ -300,21 +384,21 @@ if (moveHorseForm) {
   moveHorseForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     try {
-      const queries = await loadQueries();
       const formData = new FormData(moveHorseForm);
-      const horseId = toNumber(formData.get("horseId"));
+      const horseId = sanitizeIdentifier(formData.get("horseId"), "horse");
       const stableId = toNumber(formData.get("stableId"));
 
-      if (!Number.isFinite(horseId) || !Number.isFinite(stableId)) {
+      if (!horseId || !Number.isFinite(stableId)) {
         setResponse(moveHorseResponse, {
           state: "error",
-          message: "Horse ID and Stable ID must both be numbers.",
+          message: "Horse ID must look like horse1 and Stable ID must be a number.",
         });
         return;
       }
 
-      const query = formatQuery(queries.admin.moveHorse, {
-        horseId,
+      const moveHorseTemplate = await getAdminQuery("moveHorse");
+      const query = formatQuery(moveHorseTemplate, {
+        horseId: `'${escapeSqlString(horseId)}'`,
         stableId,
       });
 
@@ -336,7 +420,6 @@ if (approveTrainerForm) {
   approveTrainerForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     try {
-      const queries = await loadQueries();
       const formData = new FormData(approveTrainerForm);
       const trainerId = toNumber(formData.get("trainerId"));
       const firstName = escapeSqlString(formData.get("firstName"));
@@ -351,7 +434,8 @@ if (approveTrainerForm) {
         return;
       }
 
-      const query = formatQuery(queries.admin.approveTrainer, {
+      const approveTrainerTemplate = await getAdminQuery("approveTrainer");
+      const query = formatQuery(approveTrainerTemplate, {
         trainerId,
         lastName,
         firstName,

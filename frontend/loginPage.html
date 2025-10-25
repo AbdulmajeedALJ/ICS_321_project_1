@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Horse Racing DB – Login</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body class="page page--login">
+    <header class="page__header">
+      <h1>Horse Racing Database – Login</h1>
+      <p class="page__subtitle">
+        Sign in to reach the guest portal or admin console for the horse racing database.
+      </p>
+    </header>
+
+    <main class="page__content">
+      <section class="card">
+        <header class="card__header">
+          <h2>Access Your Workspace</h2>
+          <p>Enter your credentials to continue to the appropriate dashboard.</p>
+        </header>
+
+        <form id="login-form" class="form">
+          <label for="username">
+            Username
+            <input
+              id="username"
+              name="username"
+              type="text"
+              placeholder="e.g. guest"
+              autocomplete="username"
+              required
+            />
+          </label>
+
+          <label for="password">
+            Password
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Enter password"
+              autocomplete="current-password"
+              required
+            />
+          </label>
+
+          <button type="submit" class="btn btn--primary">Sign In</button>
+        </form>
+
+        <p class="hint">
+          Use <strong>guest / guest123</strong> for the guest portal or
+          <strong>admin / admin123</strong> for the admin console.
+        </p>
+
+        <section
+          id="login-response"
+          class="response"
+          aria-live="polite"
+          hidden
+        ></section>
+      </section>
+    </main>
+
+    <script src="./loginPage.js" type="module"></script>
+  </body>
+</html>
