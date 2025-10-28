@@ -27,27 +27,27 @@ This repository provides a basic Node.js backend boilerplate to help you quickly
 
 ## Getting Started
 
-### 1. Install dependencies
+### 1. Verify environment configuration
+
+- Open `.env` (or `config.env`) and confirm the database credentials, especially `DATABASE_PASSWORD`, match your local MySQL setup.
+- Update any other values such as `PORT` to suit your environment.
+
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Configure environment variables
-
-Create a `.env` file (based on `config.env`) to store values like:
-
-```
-PORT=3000
-DATABASE=<your_database_url>
-DATABASE_PASSWORD=<your_db_password>
-```
-
-### 3. Run the server
+### 3. Start the development server
 
 ```bash
-node server.js
+npm run dev
 ```
+
+### 4. Launch the login page
+
+- After the server is running, open `frontend/loginPage.html` in your browser.
+- Use the login form to sign in as either a guest or an admin.
 
 ## Available Endpoints
 

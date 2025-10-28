@@ -20,7 +20,7 @@ exports.executeQuery = async (req, res) => {
     console.error("Failed to execute custom query", err);
     res.status(500).json({
       status: "error",
-      message: "Failed to execute custom query.",
+      message: err.sqlMessage,
     });
   }
 };
