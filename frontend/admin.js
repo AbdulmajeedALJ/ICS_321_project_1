@@ -225,7 +225,7 @@ appendResultRow();
 
 const addRaceForm = document.getElementById("add-race-form");
 const addRaceResponse = document.getElementById("add-race-response");
-const allowedResults = new Set(["first", "second", "third", "other"]);
+const allowedResults = new Set(["first", "second", "third", "no show"]);
 
 if (addRaceForm) {
   addRaceForm.addEventListener("submit", async (event) => {
